@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bomba de Letras - Juego de Ronda</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0f172a',
+                            card: '#1e293b',
+                            accent: '#ef4444',
+                            glow: '#f97316'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        /* Custom pulse animation for bomb active state */
+        @keyframes pulse-fast {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+        .animate-pulse-fast {
+            animation: pulse-fast 0.8s infinite ease-in-out;
+        }
+        /* Shake animation for explosion */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px) rotate(-1deg); }
+            40%, 80% { transform: translateX(10px) rotate(1deg); }
+        }
+        .animate-shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        /* Custom scrollbar for mobile config */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 h-full flex flex-col overflow-hidden">
+
+    <div id="app" class="flex-1 flex flex-col h-full max-w-md mx-auto w-full p-4 relative justify-between">
+        
+        <!-- HEADER / TITLE BAR -->
+        <header class="flex items-center justify-between py-2 border-b border-slate-800">
+            <div class="flex items-center space-x-2">
+                <span class="text-2xl">💣</span>
+                <h1 class="font-black text-xl tracking-wider bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">BOMBA DE LETRAS</h1>
+            </div>
+            <div id="status-badge" class="hidden px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse">
+                ¡Bomba Activa!
+            </div>
+        </header>
+
+        <!-- SCREEN 1: CONFIGURATION -->
+        <div id="screen-config" class="flex-1 flex flex-col py-4 overflow-hidden">
+            <div class="mb-4">
+                <h2 class="text-lg font-bold text-slate-200">Configurar Letras</h2>
+                <p class="text-xs text-slate-400 mt-0.5">Toca las letras que deseas excluir o incluir para esta partida.</p>
+            </div>
+
+            <!-- Letter Grid Selector -->
+            <div id="config-letter-grid" class="flex-1 overflow-y-auto grid grid-cols-5 gap-2.5 p-1 content-start">
+                <!-- Javascript will populate buttons here -->
+            </div>
+
+            <!-- Configuration Actions -->
+            <div class="pt-4 border-t border-slate-800 flex flex-col gap-2">
+                <div class="flex gap-2">
+                    <button onclick="selectAllLetters(true)" class="flex-1 py-2 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-all">
+                        Todas
+                    </button>
+                    <button onclick="selectAllLetters(false)" class="flex-1 py-2 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-all">
+                        Ninguna
+                    </button>
+                    <button onclick="resetDefaultLetters()" class="flex-1 py-2 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-orange-400 rounded-xl transition-all">
+                        Predeterminadas
+                    </button>
+                </div>
+                <button onclick="startMatch()" class="w-full py-4 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-bold rounded-2xl shadow-lg shadow-orange-500/25 active:scale-95 transition-all text-base flex items-center justify-center space-x-2">
+                    <span>¡Comenzar Partida!</span>
+                    <span class="text-xl">🚀</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: GAME BOARD -->
+        <div id="screen-game" class="hidden flex-1 flex flex-col py-3 overflow-hidden">
+            
+            <!-- Central Bomb / Start Area -->
+            <div id="bomb-container" class="my-2 flex flex-col items-center justify-center bg-slate-900/80 border border-slate-800 rounded-3xl p-4 shadow-inner relative overflow-hidden transition-all duration-300">
+                <div id="bomb-prompt" class="text-center">
+                    <div id="bomb-icon" class="text-5xl mb-1 transition-transform">💣</div>
+                    <p id="bomb-instruction" class="text-sm font-semibold text-slate-300">Apoya el celu en la mesa y...</p>
+                    <button id="btn-start-bomb" onclick="triggerBombStart()" class="mt-3 px-6 py-3 bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white font-black text-sm uppercase tracking-wider rounded-2xl shadow-lg shadow-red-500/40 animate-pulse-fast active:scale-95 transition-all">
+                        ¡Toca para Iniciar Bomba!
+                    </button>
+                </div>
+                <!-- Active Bomb HUD (Hidden until started) -->
+                <div id="bomb-active-hud" class="hidden flex flex-col items-center">
+                    <div class="text-4xl animate-bounce mb-1">⏱️🔥</div>
+                    <p class="text-xs font-bold text-orange-400 uppercase tracking-widest animate-pulse">¡La bomba está rondando!</p>
+                    <p class="text-[11px] text-slate-400 mt-1">Responde la consigna y presiona tu letra</p>
+                </div>
+            </div>
+
+            <!-- Active Letter Grid -->
+            <div class="flex-1 my-2 flex flex-col overflow-hidden">
+                <div class="flex justify-between items-center mb-2 px-1">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Letras Disponibles</span>
+                    <span id="letters-count" class="text-xs font-bold text-orange-400">0 / 0</span>
+                </div>
+                <div id="game-letter-grid" class="flex-1 overflow-y-auto grid grid-cols-4 gap-2.5 p-1 content-start">
+                    <!-- Javascript will populate game letter buttons here -->
+                </div>
+            </div>
+
+            <!-- Game Bottom Actions -->
+            <div class="pt-2 border-t border-slate-800 flex gap-2">
+                <button onclick="confirmAbortGame()" class="flex-1 py-2.5 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-400 rounded-xl transition-all border border-slate-800">
+                    Reiniciar / Config
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: EXPLOSION / GAME OVER MODAL -->
+        <div id="modal-explosion" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center p-6 text-center">
+            <div class="text-7xl mb-4 animate-bounce">💥🔥💣</div>
+            <h2 class="text-3xl font-black text-red-500 tracking-wider uppercase mb-2">¡EXPLOZIÓN!</h2>
+            <p id="explosion-reason" class="text-slate-300 text-sm max-w-xs mb-6">El tiempo se acabó. ¡El jugador que tenía el celular en la mano ha perdido!</p>
+            <div class="flex flex-col w-full max-w-xs gap-3">
+                <button onclick="startMatch()" class="w-full py-4 bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white font-bold rounded-2xl shadow-lg shadow-red-500/30 active:scale-95 transition-all text-base">
+                    🔄 Jugar otra ronda
+                </button>
+                <button onclick="goToConfig()" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold rounded-2xl border border-slate-800 transition-all text-sm">
+                    ⚙️ Cambiar letras
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 4: VICTORY / ALL LETTERS USED MODAL -->
+        <div id="modal-victory" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center p-6 text-center">
+            <div class="text-7xl mb-4 animate-bounce">🏆🎉✨</div>
+            <h2 class="text-3xl font-black text-emerald-400 tracking-wider uppercase mb-2">¡SE SALVARON TODOS!</h2>
+            <p class="text-slate-300 text-sm max-w-xs mb-6">¡Completaron todas las letras antes de que estallara la bomba!</p>
+            <div class="flex flex-col w-full max-w-xs gap-3">
+                <button onclick="startMatch()" class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 text-white font-bold rounded-2xl shadow-lg shadow-emerald-500/30 active:scale-95 transition-all text-base">
+                    🔄 Jugar de nuevo
+                </button>
+                <button onclick="goToConfig()" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold rounded-2xl border border-slate-800 transition-all text-sm">
+                    ⚙️ Cambiar letras
+                </button>
+            </div>
+        </div>
+
+        <!-- FOOTER INFO -->
+        <footer class="text-center py-1 text-[10px] text-slate-500">
+            Bomba de Letras • Juego de Ronda para Celular
+        </footer>
+    </div>
+
+    <!-- AUDIO SYNTHESIZER & GAME SCRIPT -->
+    <script>
+        // Full alphabet list
+        const ALL_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'Ñ', 'O', 'P', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+        // Default standard letters (excluding W, X, Y, Z for casual ease)
+        const DEFAULT_ACTIVE = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'Ñ', 'O', 'P', 'R', 'S', 'T', 'U', 'V'];
+
+        // State variables
+        let letterState = {}; // { 'A': true/false (active in config), ... }
+        let availableGameLetters = []; // Letters active and not yet pressed in current round
+        let bombActive = false;
+        let bombTimer = null;
+        let audioCtx = null;
+
+        // Initialize configuration state on load
+        window.onload = function() {
+            resetDefaultLetters();
+            renderConfigGrid();
+        };
+
+        function resetDefaultLetters() {
+            letterState = {};
+            ALL_LETTERS.forEach(letter => {
+                letterState[letter] = DEFAULT_ACTIVE.includes(letter);
+            });
+            renderConfigGrid();
+        }
+
+        function selectAllLetters(status) {
+            ALL_LETTERS.forEach(letter => {
+                letterState[letter] = status;
+            });
+            renderConfigGrid();
+        }
+
+        function toggleConfigLetter(letter) {
+            letterState[letter] = !letterState[letter];
+            renderConfigGrid();
+        }
+
+        function renderConfigGrid() {
+            const grid = document.getElementById('config-letter-grid');
+            grid.innerHTML = '';
+            ALL_LETTERS.forEach(letter => {
+                const isActive = letterState[letter];
+                const btn = document.createElement('button');
+                btn.className = `h-14 rounded-2xl font-black text-lg transition-all flex items-center justify-center border shadow-sm ${
+                    isActive 
+                        ? 'bg-gradient-to-br from-slate-800 to-slate-900 border-orange-500/50 text-orange-400 shadow-orange-500/10' 
+                        : 'bg-slate-900/40 border-slate-800/60 text-slate-600 line-through'
+                }`;
+                btn.innerText = letter;
+                btn.onclick = () => toggleConfigLetter(letter);
+                grid.appendChild(btn);
+            });
+        }
+
+        function goToConfig() {
+            stopBomb();
+            document.getElementById('modal-explosion').classList.add('hidden');
+            document.getElementById('modal-victory').classList.add('hidden');
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-config').classList.remove('hidden');
+            document.getElementById('status-badge').classList.add('hidden');
+        }
+
+        function startMatch() {
+            // Filter active letters from config
+            availableGameLetters = ALL_LETTERS.filter(l => letterState[l] === true);
+            
+            if (availableGameLetters.length === 0) {
+                showCustomMessage("Debes seleccionar al menos una letra para jugar.");
+                return;
+            }
+
+            // Switch screens
+            document.getElementById('modal-explosion').classList.add('hidden');
+            document.getElementById('modal-victory').classList.add('hidden');
+            document.getElementById('screen-config').classList.add('hidden');
+            document.getElementById('screen-game').classList.remove('hidden');
+            document.getElementById('status-badge').classList.add('hidden');
+
+            // Reset bomb UI
+            bombActive = false;
+            document.getElementById('bomb-prompt').classList.remove('hidden');
+            document.getElementById('bomb-active-hud').classList.add('hidden');
+            document.getElementById('bomb-container').className = "my-2 flex flex-col items-center justify-center bg-slate-900/80 border border-slate-800 rounded-3xl p-4 shadow-inner relative overflow-hidden transition-all duration-300";
+
+            renderGameGrid();
+        }
+
+        function renderGameGrid() {
+            const grid = document.getElementById('game-letter-grid');
+            grid.innerHTML = '';
+            
+            // Count indicator
+            const totalActiveCount = availableGameLetters.length;
+            document.getElementById('letters-count').innerText = `${totalActiveCount} restan`;
+
+            // Render buttons for available letters only (disappearing once pressed)
+            availableGameLetters.forEach(letter => {
+                const btn = document.createElement('button');
+                btn.className = `h-16 rounded-2xl font-black text-xl transition-all flex items-center justify-center border shadow-md active:scale-95 ${
+                    bombActive 
+                        ? 'bg-slate-900 border-slate-700 text-slate-100 hover:border-orange-500 hover:text-orange-400 shadow-slate-900/50' 
+                        : 'bg-slate-900/50 border-slate-800 text-slate-500 cursor-not-allowed opacity-60'
+                }`;
+                btn.innerText = letter;
+                btn.onclick = () => {
+                    if (bombActive) {
+                        selectGameLetter(letter);
+                    } else {
+                        playClickSound();
+                    }
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function triggerBombStart() {
+            initAudio();
+            playStartSound();
+
+            bombActive = true;
+            document.getElementById('bomb-prompt').classList.add('hidden');
+            document.getElementById('bomb-active-hud').classList.remove('hidden');
+            document.getElementById('status-badge').classList.remove('hidden');
+            document.getElementById('bomb-container').className = "my-2 flex flex-col items-center justify-center bg-gradient-to-b from-orange-950/40 to-slate-900 border border-orange-500/50 rounded-3xl p-4 shadow-lg shadow-orange-500/10 relative overflow-hidden transition-all duration-300 animate-pulse";
+
+            renderGameGrid();
+
+            // Random secret time between 25 and 60 seconds (25000ms to 60000ms)
+            const randomTimeMs = Math.floor(Math.random() * (60000 - 25000 + 1)) + 25000;
+            
+            // Clear any existing timer
+            if (bombTimer) clearTimeout(bombTimer);
+
+            bombTimer = setTimeout(() => {
+                triggerExplosion();
+            }, randomTimeMs);
+        }
+
+        function selectGameLetter(letter) {
+            playLetterClickSound();
+            
+            // Remove letter from available pool (disappears instantly)
+            availableGameLetters = availableGameLetters.filter(l => l !== letter);
+            
+            renderGameGrid();
+
+            // Check if all letters were used up before time ran out
+            if (availableGameLetters.length === 0) {
+                if (bombTimer) clearTimeout(bombTimer);
+                triggerVictory();
+            }
+        }
+
+        function confirmAbortGame() {
+            if (confirm("¿Estás seguro de que deseas reiniciar la partida actual?")) {
+                if (bombTimer) clearTimeout(bombTimer);
+                startMatch();
+            }
+        }
+
+        function stopBomb() {
+            if (bombTimer) clearTimeout(bombTimer);
+            bombActive = false;
+        }
+
+        function triggerExplosion() {
+            stopBomb();
+            playExplosionSound();
+            triggerVibration([300, 100, 300, 100, 500]);
+            document.getElementById('status-badge').classList.add('hidden');
+            document.getElementById('modal-explosion').classList.remove('hidden');
+        }
+
+        function triggerVictory() {
+            playVictorySound();
+            triggerVibration([200, 100, 200]);
+            document.getElementById('status-badge').classList.add('hidden');
+            document.getElementById('modal-victory').classList.remove('hidden');
+        }
+
+        function triggerVibration(pattern) {
+            if ("vibrate" in navigator) {
+                try {
+                    navigator.vibrate(pattern);
+                } catch(e) {
+                    // Ignore if permission denied or unsupported
+                }
+            }
+        }
+
+        // WEB AUDIO API SYNTHESIZER SOUNDS (No external assets required)
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playClickSound() {
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } catch(e) {}
+        }
+
+        function playStartSound() {
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } catch(e) {}
+        }
+
+        function playLetterClickSound() {
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+            } catch(e) {}
+        }
+
+        function playExplosionSound() {
+            try {
+                initAudio();
+                // Create white noise buffer for explosion sound
+                const bufferSize = audioCtx.sampleRate * 1.5;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(300, audioCtx.currentTime);
+                filter.frequency.linearRampToValueAtTime(50, audioCtx.currentTime + 1.5);
+
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                noise.start();
+            } catch(e) {}
+        }
+
+        function playVictorySound() {
+            try {
+                initAudio();
+                const now = audioCtx.currentTime;
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, index) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + index * 0.1);
+                    gain.gain.setValueAtTime(0.1, now + index * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.1 + 0.3);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + index * 0.1);
+                    osc.stop(now + index * 0.1 + 0.3);
+                });
+            } catch(e) {}
+        }
+
+        function showCustomMessage(msg) {
+            // Custom non-blocking notification instead of alert()
+            const div = document.createElement('div');
+            div.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-slate-900 border border-orange-500 text-orange-400 px-4 py-3 rounded-2xl shadow-xl z-50 text-xs font-bold transition-all';
+            div.innerText = msg;
+            document.body.appendChild(div);
+            setTimeout(() => {
+                div.style.opacity = '0';
+                setTimeout(() => div.remove(), 300);
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
