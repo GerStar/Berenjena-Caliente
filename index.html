@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bomba de Letras - Juego de Ronda</title>
+    <title>La Berenjena Caliente</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -12,11 +12,14 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            dark: '#0f172a',
-                            card: '#1e293b',
-                            accent: '#ef4444',
-                            glow: '#f97316'
+                        eggplant: {
+                            50: '#fdf4ff',
+                            100: '#fae8ff',
+                            400: '#c084fc',
+                            600: '#9333ea',
+                            800: '#581c87',
+                            900: '#3b0764',
+                            950: '#240046'
                         }
                     }
                 }
@@ -32,192 +35,311 @@
             user-select: none;
             -webkit-user-select: none;
         }
-        /* Custom pulse animation for bomb active state */
+        
+        /* Heartbeat / pulsating eggplant animation */
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            14% { transform: scale(1.15); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.22); }
+            70% { transform: scale(1); }
+        }
+        .animate-eggplant-pulse {
+            animation: heartbeat 1.1s infinite ease-in-out;
+        }
+
+        /* Fast pulse for button highlight */
         @keyframes pulse-fast {
             0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 0.85; }
         }
         .animate-pulse-fast {
             animation: pulse-fast 0.8s infinite ease-in-out;
         }
-        /* Shake animation for explosion */
+
+        /* Explosion shake effect */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-10px) rotate(-1deg); }
-            40%, 80% { transform: translateX(10px) rotate(1deg); }
+            20%, 60% { transform: translateX(-12px) rotate(-3deg); }
+            40%, 80% { transform: translateX(12px) rotate(3deg); }
         }
         .animate-shake {
-            animation: shake 0.5s ease-in-out;
+            animation: shake 0.4s ease-in-out;
         }
-        /* Custom scrollbar for mobile config */
+
+        /* Custom mobile scrollbar */
         ::-webkit-scrollbar {
             width: 4px;
         }
         ::-webkit-scrollbar-thumb {
-            background: #475569;
+            background: #581c87;
             border-radius: 4px;
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 h-full flex flex-col overflow-hidden">
+<body class="bg-eggplant-950 text-slate-100 h-full flex flex-col overflow-hidden">
 
     <div id="app" class="flex-1 flex flex-col h-full max-w-md mx-auto w-full p-4 relative justify-between">
         
         <!-- HEADER / TITLE BAR -->
-        <header class="flex items-center justify-between py-2 border-b border-slate-800">
-            <div class="flex items-center space-x-2">
-                <span class="text-2xl">💣</span>
-                <h1 class="font-black text-xl tracking-wider bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">BOMBA DE LETRAS</h1>
+        <header class="flex items-center justify-between py-2 border-b border-eggplant-900">
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="goToMenu()">
+                <span class="text-3xl">🍆</span>
+                <h1 class="font-black text-xl tracking-wider bg-gradient-to-r from-purple-300 via-fuchsia-400 to-emerald-400 bg-clip-text text-transparent">
+                    LA BERENJENA
+                </h1>
             </div>
-            <div id="status-badge" class="hidden px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse">
-                ¡Bomba Activa!
+            <div id="status-badge" class="hidden px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-purple-500/20 text-fuchsia-300 border border-fuchsia-500/40 animate-pulse">
+                ¡En Juego!
             </div>
         </header>
 
-        <!-- SCREEN 1: CONFIGURATION -->
-        <div id="screen-config" class="flex-1 flex flex-col py-4 overflow-hidden">
-            <div class="mb-4">
-                <h2 class="text-lg font-bold text-slate-200">Configurar Letras</h2>
-                <p class="text-xs text-slate-400 mt-0.5">Toca las letras que deseas excluir o incluir para esta partida.</p>
+        <!-- SCREEN 0: MODE SELECTION MENU -->
+        <div id="screen-menu" class="flex-1 flex flex-col justify-center py-6 gap-5">
+            <div class="text-center my-2">
+                <div class="text-7xl mb-2 animate-eggplant-pulse">🍆🔥</div>
+                <h2 class="text-2xl font-black text-fuchsia-200">Elige el Modo de Juego</h2>
+                <p class="text-xs text-purple-300/80 mt-1">Selecciona la dinámica de ronda con tus amigos</p>
+            </div>
+
+            <div class="flex flex-col gap-4 my-auto">
+                <!-- Mode 1 Option -->
+                <button onclick="selectMode('letters')" class="p-5 bg-gradient-to-r from-eggplant-900 to-purple-900/80 hover:from-eggplant-800 hover:to-purple-800 border border-purple-500/30 rounded-3xl text-left shadow-lg active:scale-95 transition-all group">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xl font-extrabold text-fuchsia-300 group-hover:text-white">🔤 Bomba de Letras</span>
+                        <span class="text-xs bg-purple-500/30 text-purple-200 px-2.5 py-1 rounded-full font-bold">Mesa</span>
+                    </div>
+                    <p class="text-xs text-purple-200/70 leading-relaxed">
+                        Apoyen el celular en la mesa. Decí una palabra según la consigna, tocá la letra inicial y pasale el turno al siguiente.
+                    </p>
+                </button>
+
+                <!-- Mode 2 Option -->
+                <button onclick="selectMode('classic')" class="p-5 bg-gradient-to-r from-fuchsia-950 to-eggplant-900 hover:from-fuchsia-900 hover:to-eggplant-800 border border-fuchsia-500/40 rounded-3xl text-left shadow-lg active:scale-95 transition-all group">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xl font-extrabold text-emerald-400 group-hover:text-emerald-300">🍆 Berenjena Caliente</span>
+                        <span class="text-xs bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-full font-bold">Pasa-Pasa</span>
+                    </div>
+                    <p class="text-xs text-purple-200/70 leading-relaxed">
+                        El pasa-pasa de toda la vida. Pásense el celular de mano en mano rápidamente. ¡Cuidado que no te explote a vos!
+                    </p>
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 1: LETTER CONFIGURATION (MODE 1) -->
+        <div id="screen-config" class="hidden flex-1 flex flex-col py-4 overflow-hidden">
+            <div class="mb-3 flex justify-between items-end">
+                <div>
+                    <h2 class="text-lg font-bold text-fuchsia-200">Configurar Letras</h2>
+                    <p class="text-xs text-purple-300/80">Selecciona las letras disponibles para esta ronda.</p>
+                </div>
+                <button onclick="goToMenu()" class="text-xs text-purple-400 underline hover:text-purple-200">Cambiar Modo</button>
             </div>
 
             <!-- Letter Grid Selector -->
-            <div id="config-letter-grid" class="flex-1 overflow-y-auto grid grid-cols-5 gap-2.5 p-1 content-start">
-                <!-- Javascript will populate buttons here -->
+            <div id="config-letter-grid" class="flex-1 overflow-y-auto grid grid-cols-5 gap-2 p-1 content-start">
+                <!-- JS populated -->
             </div>
 
             <!-- Configuration Actions -->
-            <div class="pt-4 border-t border-slate-800 flex flex-col gap-2">
+            <div class="pt-3 border-t border-eggplant-900 flex flex-col gap-2">
                 <div class="flex gap-2">
-                    <button onclick="selectAllLetters(true)" class="flex-1 py-2 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-all">
+                    <button onclick="selectAllLetters(true)" class="flex-1 py-2 text-xs font-semibold bg-eggplant-900 hover:bg-eggplant-800 text-purple-200 rounded-xl transition-all">
                         Todas
                     </button>
-                    <button onclick="selectAllLetters(false)" class="flex-1 py-2 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-all">
+                    <button onclick="selectAllLetters(false)" class="flex-1 py-2 text-xs font-semibold bg-eggplant-900 hover:bg-eggplant-800 text-purple-200 rounded-xl transition-all">
                         Ninguna
                     </button>
-                    <button onclick="resetDefaultLetters()" class="flex-1 py-2 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-orange-400 rounded-xl transition-all">
-                        Predeterminadas
+                    <button onclick="resetDefaultLetters()" class="flex-1 py-2 text-xs font-semibold bg-eggplant-900 hover:bg-eggplant-800 text-fuchsia-400 rounded-xl transition-all">
+                        Comunes
                     </button>
                 </div>
-                <button onclick="startMatch()" class="w-full py-4 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-bold rounded-2xl shadow-lg shadow-orange-500/25 active:scale-95 transition-all text-base flex items-center justify-center space-x-2">
-                    <span>¡Comenzar Partida!</span>
+                <button onclick="startLettersMatch()" class="w-full py-4 bg-gradient-to-r from-fuchsia-600 to-eggplant-600 hover:from-fuchsia-700 hover:to-eggplant-700 text-white font-bold rounded-2xl shadow-lg shadow-fuchsia-600/30 active:scale-95 transition-all text-base flex items-center justify-center space-x-2">
+                    <span>¡Iniciar Ronda de Letras!</span>
                     <span class="text-xl">🚀</span>
                 </button>
             </div>
         </div>
 
-        <!-- SCREEN 2: GAME BOARD -->
-        <div id="screen-game" class="hidden flex-1 flex flex-col py-3 overflow-hidden">
-            
+        <!-- SCREEN 2: LETTERS GAME BOARD (MODE 1) -->
+        <div id="screen-letters-game" class="hidden flex-1 flex flex-col py-3 overflow-hidden">
             <!-- Central Bomb / Start Area -->
-            <div id="bomb-container" class="my-2 flex flex-col items-center justify-center bg-slate-900/80 border border-slate-800 rounded-3xl p-4 shadow-inner relative overflow-hidden transition-all duration-300">
-                <div id="bomb-prompt" class="text-center">
-                    <div id="bomb-icon" class="text-5xl mb-1 transition-transform">💣</div>
-                    <p id="bomb-instruction" class="text-sm font-semibold text-slate-300">Apoya el celu en la mesa y...</p>
-                    <button id="btn-start-bomb" onclick="triggerBombStart()" class="mt-3 px-6 py-3 bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white font-black text-sm uppercase tracking-wider rounded-2xl shadow-lg shadow-red-500/40 animate-pulse-fast active:scale-95 transition-all">
-                        ¡Toca para Iniciar Bomba!
+            <div id="letters-bomb-container" class="my-2 flex flex-col items-center justify-center bg-eggplant-900/60 border border-eggplant-800 rounded-3xl p-4 shadow-inner relative overflow-hidden transition-all duration-300">
+                <div id="letters-prompt" class="text-center">
+                    <div class="text-5xl mb-1">🍆💣</div>
+                    <p class="text-xs font-semibold text-purple-200">Apoya el celu en la mesa y...</p>
+                    <button id="btn-start-letters-bomb" onclick="triggerLettersStart()" class="mt-3 px-6 py-3 bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-700 hover:to-purple-700 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-fuchsia-600/40 animate-pulse-fast active:scale-95 transition-all">
+                        ¡Iniciar Tiempo Secreto!
                     </button>
                 </div>
-                <!-- Active Bomb HUD (Hidden until started) -->
-                <div id="bomb-active-hud" class="hidden flex flex-col items-center">
-                    <div class="text-4xl animate-bounce mb-1">⏱️🔥</div>
-                    <p class="text-xs font-bold text-orange-400 uppercase tracking-widest animate-pulse">¡La bomba está rondando!</p>
-                    <p class="text-[11px] text-slate-400 mt-1">Responde la consigna y presiona tu letra</p>
+                <!-- Active Bomb HUD -->
+                <div id="letters-active-hud" class="hidden flex flex-col items-center">
+                    <div class="text-4xl animate-bounce mb-1">⏱️🍆</div>
+                    <p class="text-xs font-bold text-fuchsia-300 uppercase tracking-widest animate-pulse">¡La berenjena está corriendo!</p>
+                    <p class="text-[11px] text-purple-300/80 mt-0.5">Responde, toca tu letra y cede el turno</p>
                 </div>
             </div>
 
             <!-- Active Letter Grid -->
             <div class="flex-1 my-2 flex flex-col overflow-hidden">
                 <div class="flex justify-between items-center mb-2 px-1">
-                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Letras Disponibles</span>
-                    <span id="letters-count" class="text-xs font-bold text-orange-400">0 / 0</span>
+                    <span class="text-xs font-semibold text-purple-300 uppercase tracking-wider">Letras Disponibles</span>
+                    <span id="letters-count" class="text-xs font-bold text-fuchsia-400">0 / 0</span>
                 </div>
                 <div id="game-letter-grid" class="flex-1 overflow-y-auto grid grid-cols-4 gap-2.5 p-1 content-start">
-                    <!-- Javascript will populate game letter buttons here -->
+                    <!-- JS populated -->
                 </div>
             </div>
 
             <!-- Game Bottom Actions -->
-            <div class="pt-2 border-t border-slate-800 flex gap-2">
-                <button onclick="confirmAbortGame()" class="flex-1 py-2.5 text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-400 rounded-xl transition-all border border-slate-800">
-                    Reiniciar / Config
+            <div class="pt-2 border-t border-eggplant-900 flex gap-2">
+                <button onclick="confirmAbortGame()" class="flex-1 py-2.5 text-xs font-semibold bg-eggplant-900 hover:bg-eggplant-800 text-purple-300 rounded-xl transition-all border border-eggplant-800">
+                    Reiniciar / Menú
                 </button>
             </div>
         </div>
 
-        <!-- SCREEN 3: EXPLOSION / GAME OVER MODAL -->
-        <div id="modal-explosion" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center p-6 text-center">
-            <div class="text-7xl mb-4 animate-bounce">💥🔥💣</div>
-            <h2 class="text-3xl font-black text-red-500 tracking-wider uppercase mb-2">¡EXPLOZIÓN!</h2>
-            <p id="explosion-reason" class="text-slate-300 text-sm max-w-xs mb-6">El tiempo se acabó. ¡El jugador que tenía el celular en la mano ha perdido!</p>
+        <!-- SCREEN 3: CLASSIC EGGPLANT GAME (MODE 2) -->
+        <div id="screen-classic-game" class="hidden flex-1 flex flex-col justify-between py-4 text-center">
+            <div id="classic-header" class="mb-2">
+                <h2 class="text-xl font-black text-fuchsia-300">¡Berenjena Caliente!</h2>
+                <p id="classic-subtitle" class="text-xs text-purple-300/80 mt-1">Pásense el celular en la ronda</p>
+            </div>
+
+            <!-- Giant Pulsating Eggplant Display -->
+            <div class="my-auto flex flex-col items-center justify-center p-6">
+                <div id="classic-eggplant-icon" class="text-9xl my-4 transition-all duration-300">
+                    🍆
+                </div>
+                <p id="classic-status-text" class="text-sm font-bold text-purple-300 h-6">
+                    Presiona Iniciar para comenzar
+                </p>
+            </div>
+
+            <!-- Control Button -->
+            <div class="py-2 flex flex-col gap-3">
+                <button id="btn-start-classic" onclick="triggerClassicStart()" class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-950 font-black text-base uppercase tracking-wider rounded-2xl shadow-lg shadow-emerald-500/30 animate-pulse-fast active:scale-95 transition-all">
+                    ¡Iniciar Ronda! 🔥
+                </button>
+                <button onclick="goToMenu()" class="w-full py-2.5 text-xs font-semibold bg-eggplant-900 hover:bg-eggplant-800 text-purple-300 rounded-xl transition-all border border-eggplant-800">
+                    Volver al Menú
+                </button>
+            </div>
+        </div>
+
+        <!-- MODAL: EXPLOSION (GAME OVER) -->
+        <div id="modal-explosion" class="fixed inset-0 bg-eggplant-950/95 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center p-6 text-center animate-shake">
+            <div id="explosion-icon" class="text-8xl mb-3 animate-bounce">💥🍆💨</div>
+            <h2 id="explosion-title" class="text-4xl font-black text-fuchsia-500 tracking-wider uppercase mb-2">¡EXPLOSIÓN!</h2>
+            <p id="explosion-reason" class="text-purple-200 text-sm max-w-xs mb-6">Se acabó el tiempo. ¡Al que le quedó la berenjena en la mano perdió!</p>
+            
             <div class="flex flex-col w-full max-w-xs gap-3">
-                <button onclick="startMatch()" class="w-full py-4 bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white font-bold rounded-2xl shadow-lg shadow-red-500/30 active:scale-95 transition-all text-base">
+                <button id="btn-retry-mode" onclick="restartCurrentMode()" class="w-full py-4 bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-700 hover:to-purple-700 text-white font-bold rounded-2xl shadow-lg shadow-fuchsia-600/30 active:scale-95 transition-all text-base">
                     🔄 Jugar otra ronda
                 </button>
-                <button onclick="goToConfig()" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold rounded-2xl border border-slate-800 transition-all text-sm">
-                    ⚙️ Cambiar letras
+                <button onclick="goToMenu()" class="w-full py-3 bg-eggplant-900 hover:bg-eggplant-800 text-purple-300 font-semibold rounded-2xl border border-eggplant-800 transition-all text-sm">
+                    🏠 Menú Principal
                 </button>
             </div>
         </div>
 
-        <!-- SCREEN 4: VICTORY / ALL LETTERS USED MODAL -->
-        <div id="modal-victory" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center p-6 text-center">
+        <!-- MODAL: VICTORY (ALL LETTERS USED) -->
+        <div id="modal-victory" class="fixed inset-0 bg-eggplant-950/95 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center p-6 text-center">
             <div class="text-7xl mb-4 animate-bounce">🏆🎉✨</div>
             <h2 class="text-3xl font-black text-emerald-400 tracking-wider uppercase mb-2">¡SE SALVARON TODOS!</h2>
-            <p class="text-slate-300 text-sm max-w-xs mb-6">¡Completaron todas las letras antes de que estallara la bomba!</p>
+            <p class="text-purple-200 text-sm max-w-xs mb-6">¡Completaron todas las letras antes de que estallara la berenjena!</p>
             <div class="flex flex-col w-full max-w-xs gap-3">
-                <button onclick="startMatch()" class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 text-white font-bold rounded-2xl shadow-lg shadow-emerald-500/30 active:scale-95 transition-all text-base">
+                <button onclick="startLettersMatch()" class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 text-white font-bold rounded-2xl shadow-lg shadow-emerald-500/30 active:scale-95 transition-all text-base">
                     🔄 Jugar de nuevo
                 </button>
-                <button onclick="goToConfig()" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold rounded-2xl border border-slate-800 transition-all text-sm">
-                    ⚙️ Cambiar letras
+                <button onclick="goToMenu()" class="w-full py-3 bg-eggplant-900 hover:bg-eggplant-800 text-purple-300 font-semibold rounded-2xl border border-eggplant-800 transition-all text-sm">
+                    🏠 Menú Principal
                 </button>
             </div>
         </div>
 
         <!-- FOOTER INFO -->
-        <footer class="text-center py-1 text-[10px] text-slate-500">
-            Bomba de Letras • Juego de Ronda para Celular
+        <footer class="text-center py-1 text-[10px] text-purple-400/60">
+            La Berenjena Caliente • Juego de Ronda
         </footer>
     </div>
 
-    <!-- AUDIO SYNTHESIZER & GAME SCRIPT -->
     <script>
-        // Full alphabet list
+        // Letters definition
         const ALL_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'Ñ', 'O', 'P', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
-        // Default standard letters (excluding W, X, Y, Z for casual ease)
         const DEFAULT_ACTIVE = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'Ñ', 'O', 'P', 'R', 'S', 'T', 'U', 'V'];
 
-        // State variables
-        let letterState = {}; // { 'A': true/false (active in config), ... }
-        let availableGameLetters = []; // Letters active and not yet pressed in current round
-        let bombActive = false;
-        let bombTimer = null;
+        // Global State
+        let currentMode = null; // 'letters' or 'classic'
+        let letterState = {}; 
+        let availableGameLetters = []; 
+        let roundActive = false;
+        let roundTimer = null;
         let audioCtx = null;
 
-        // Initialize configuration state on load
         window.onload = function() {
             resetDefaultLetters();
-            renderConfigGrid();
+            goToMenu();
         };
 
+        // NAVIGATION & MENU
+        function goToMenu() {
+            stopRound();
+            hideAllModals();
+            document.getElementById('screen-menu').classList.remove('hidden');
+            document.getElementById('screen-config').classList.add('hidden');
+            document.getElementById('screen-letters-game').classList.add('hidden');
+            document.getElementById('screen-classic-game').classList.add('hidden');
+            document.getElementById('status-badge').classList.add('hidden');
+        }
+
+        function selectMode(mode) {
+            initAudio();
+            currentMode = mode;
+            document.getElementById('screen-menu').classList.add('hidden');
+            
+            if (mode === 'letters') {
+                document.getElementById('screen-config').classList.remove('hidden');
+                renderConfigGrid();
+            } else if (mode === 'classic') {
+                document.getElementById('screen-classic-game').classList.remove('hidden');
+                resetClassicUI();
+            }
+        }
+
+        function restartCurrentMode() {
+            hideAllModals();
+            if (currentMode === 'letters') {
+                startLettersMatch();
+            } else if (currentMode === 'classic') {
+                triggerClassicStart();
+            }
+        }
+
+        function hideAllModals() {
+            document.getElementById('modal-explosion').classList.add('hidden');
+            document.getElementById('modal-victory').classList.add('hidden');
+        }
+
+        // MODE 1: LETTERS LOGIC
         function resetDefaultLetters() {
             letterState = {};
-            ALL_LETTERS.forEach(letter => {
-                letterState[letter] = DEFAULT_ACTIVE.includes(letter);
+            ALL_LETTERS.forEach(l => {
+                letterState[l] = DEFAULT_ACTIVE.includes(l);
             });
-            renderConfigGrid();
+            if (!document.getElementById('screen-config').classList.contains('hidden')) {
+                renderConfigGrid();
+            }
         }
 
         function selectAllLetters(status) {
-            ALL_LETTERS.forEach(letter => {
-                letterState[letter] = status;
-            });
+            ALL_LETTERS.forEach(l => letterState[l] = status);
             renderConfigGrid();
         }
 
-        function toggleConfigLetter(letter) {
-            letterState[letter] = !letterState[letter];
+        function toggleConfigLetter(l) {
+            letterState[l] = !letterState[l];
             renderConfigGrid();
         }
 
@@ -227,10 +349,10 @@
             ALL_LETTERS.forEach(letter => {
                 const isActive = letterState[letter];
                 const btn = document.createElement('button');
-                btn.className = `h-14 rounded-2xl font-black text-lg transition-all flex items-center justify-center border shadow-sm ${
+                btn.className = `h-12 rounded-xl font-black text-base transition-all flex items-center justify-center border ${
                     isActive 
-                        ? 'bg-gradient-to-br from-slate-800 to-slate-900 border-orange-500/50 text-orange-400 shadow-orange-500/10' 
-                        : 'bg-slate-900/40 border-slate-800/60 text-slate-600 line-through'
+                        ? 'bg-eggplant-900 border-fuchsia-500/60 text-fuchsia-300 shadow-sm' 
+                        : 'bg-eggplant-950/60 border-eggplant-900/60 text-purple-400/40 line-through'
                 }`;
                 btn.innerText = letter;
                 btn.onclick = () => toggleConfigLetter(letter);
@@ -238,36 +360,22 @@
             });
         }
 
-        function goToConfig() {
-            stopBomb();
-            document.getElementById('modal-explosion').classList.add('hidden');
-            document.getElementById('modal-victory').classList.add('hidden');
-            document.getElementById('screen-game').classList.add('hidden');
-            document.getElementById('screen-config').classList.remove('hidden');
-            document.getElementById('status-badge').classList.add('hidden');
-        }
-
-        function startMatch() {
-            // Filter active letters from config
+        function startLettersMatch() {
             availableGameLetters = ALL_LETTERS.filter(l => letterState[l] === true);
-            
             if (availableGameLetters.length === 0) {
-                showCustomMessage("Debes seleccionar al menos una letra para jugar.");
+                showToast("Debes seleccionar al menos una letra para jugar.");
                 return;
             }
 
-            // Switch screens
-            document.getElementById('modal-explosion').classList.add('hidden');
-            document.getElementById('modal-victory').classList.add('hidden');
+            hideAllModals();
             document.getElementById('screen-config').classList.add('hidden');
-            document.getElementById('screen-game').classList.remove('hidden');
+            document.getElementById('screen-letters-game').classList.remove('hidden');
             document.getElementById('status-badge').classList.add('hidden');
 
-            // Reset bomb UI
-            bombActive = false;
-            document.getElementById('bomb-prompt').classList.remove('hidden');
-            document.getElementById('bomb-active-hud').classList.add('hidden');
-            document.getElementById('bomb-container').className = "my-2 flex flex-col items-center justify-center bg-slate-900/80 border border-slate-800 rounded-3xl p-4 shadow-inner relative overflow-hidden transition-all duration-300";
+            roundActive = false;
+            document.getElementById('letters-prompt').classList.remove('hidden');
+            document.getElementById('letters-active-hud').classList.add('hidden');
+            document.getElementById('letters-bomb-container').className = "my-2 flex flex-col items-center justify-center bg-eggplant-900/60 border border-eggplant-800 rounded-3xl p-4 shadow-inner relative overflow-hidden transition-all duration-300";
 
             renderGameGrid();
         }
@@ -276,89 +384,128 @@
             const grid = document.getElementById('game-letter-grid');
             grid.innerHTML = '';
             
-            // Count indicator
-            const totalActiveCount = availableGameLetters.length;
-            document.getElementById('letters-count').innerText = `${totalActiveCount} restan`;
+            document.getElementById('letters-count').innerText = `${availableGameLetters.length} restan`;
 
-            // Render buttons for available letters only (disappearing once pressed)
             availableGameLetters.forEach(letter => {
                 const btn = document.createElement('button');
                 btn.className = `h-16 rounded-2xl font-black text-xl transition-all flex items-center justify-center border shadow-md active:scale-95 ${
-                    bombActive 
-                        ? 'bg-slate-900 border-slate-700 text-slate-100 hover:border-orange-500 hover:text-orange-400 shadow-slate-900/50' 
-                        : 'bg-slate-900/50 border-slate-800 text-slate-500 cursor-not-allowed opacity-60'
+                    roundActive 
+                        ? 'bg-eggplant-900 border-eggplant-700 text-slate-100 hover:border-fuchsia-400 hover:text-fuchsia-300' 
+                        : 'bg-eggplant-950/50 border-eggplant-900 text-purple-300/40 cursor-not-allowed'
                 }`;
                 btn.innerText = letter;
                 btn.onclick = () => {
-                    if (bombActive) {
-                        selectGameLetter(letter);
-                    } else {
-                        playClickSound();
-                    }
+                    if (roundActive) selectGameLetter(letter);
+                    else playPopSound();
                 };
                 grid.appendChild(btn);
             });
         }
 
-        function triggerBombStart() {
+        function triggerLettersStart() {
             initAudio();
             playStartSound();
 
-            bombActive = true;
-            document.getElementById('bomb-prompt').classList.add('hidden');
-            document.getElementById('bomb-active-hud').classList.remove('hidden');
+            roundActive = true;
+            document.getElementById('letters-prompt').classList.add('hidden');
+            document.getElementById('letters-active-hud').classList.remove('hidden');
             document.getElementById('status-badge').classList.remove('hidden');
-            document.getElementById('bomb-container').className = "my-2 flex flex-col items-center justify-center bg-gradient-to-b from-orange-950/40 to-slate-900 border border-orange-500/50 rounded-3xl p-4 shadow-lg shadow-orange-500/10 relative overflow-hidden transition-all duration-300 animate-pulse";
+            document.getElementById('letters-bomb-container').className = "my-2 flex flex-col items-center justify-center bg-gradient-to-b from-fuchsia-950/60 to-eggplant-900 border border-fuchsia-500/50 rounded-3xl p-4 shadow-lg shadow-fuchsia-500/10 relative overflow-hidden transition-all duration-300 animate-pulse";
 
             renderGameGrid();
-
-            // Random secret time between 25 and 60 seconds (25000ms to 60000ms)
-            const randomTimeMs = Math.floor(Math.random() * (60000 - 25000 + 1)) + 25000;
-            
-            // Clear any existing timer
-            if (bombTimer) clearTimeout(bombTimer);
-
-            bombTimer = setTimeout(() => {
-                triggerExplosion();
-            }, randomTimeMs);
+            startRandomTimer();
         }
 
         function selectGameLetter(letter) {
-            playLetterClickSound();
-            
-            // Remove letter from available pool (disappears instantly)
+            playPopSound();
             availableGameLetters = availableGameLetters.filter(l => l !== letter);
-            
             renderGameGrid();
 
-            // Check if all letters were used up before time ran out
             if (availableGameLetters.length === 0) {
-                if (bombTimer) clearTimeout(bombTimer);
+                stopRound();
                 triggerVictory();
             }
         }
 
+        // MODE 2: CLASSIC EGGPLANT PASS-PASS LOGIC
+        function resetClassicUI() {
+            stopRound();
+            const icon = document.getElementById('classic-eggplant-icon');
+            icon.className = "text-9xl my-4 transition-all duration-300";
+            icon.innerText = "🍆";
+            document.getElementById('classic-status-text').innerText = "Presiona Iniciar para comenzar";
+            document.getElementById('classic-subtitle').innerText = "Pásense el celular en la ronda";
+            
+            const btn = document.getElementById('btn-start-classic');
+            btn.classList.remove('hidden');
+            btn.innerText = "¡Iniciar Ronda! 🔥";
+            document.getElementById('status-badge').classList.add('hidden');
+        }
+
+        function triggerClassicStart() {
+            initAudio();
+            playStartSound();
+
+            roundActive = true;
+            document.getElementById('status-badge').classList.remove('hidden');
+            document.getElementById('btn-start-classic').classList.add('hidden');
+            document.getElementById('classic-subtitle').innerText = "¡Pásenlo rápido antes de que explote!";
+            document.getElementById('classic-status-text').innerText = "¡LA BERENJENA ESTÁ CALIENTE!";
+
+            const icon = document.getElementById('classic-eggplant-icon');
+            icon.className = "text-9xl my-4 animate-eggplant-pulse";
+
+            startRandomTimer();
+        }
+
+        // TIMER & EXPLOSION CONTROL
+        function startRandomTimer() {
+            if (roundTimer) clearTimeout(roundTimer);
+            // Secret random duration between 25 and 60 seconds
+            const randomMs = Math.floor(Math.random() * (60000 - 25000 + 1)) + 25000;
+            roundTimer = setTimeout(() => {
+                triggerExplosion();
+            }, randomMs);
+        }
+
+        function stopRound() {
+            if (roundTimer) clearTimeout(roundTimer);
+            roundActive = false;
+        }
+
         function confirmAbortGame() {
-            if (confirm("¿Estás seguro de que deseas reiniciar la partida actual?")) {
-                if (bombTimer) clearTimeout(bombTimer);
-                startMatch();
+            if (confirm("¿Reiniciar la ronda actual?")) {
+                startLettersMatch();
             }
         }
 
-        function stopBomb() {
-            if (bombTimer) clearTimeout(bombTimer);
-            bombActive = false;
-        }
-
         function triggerExplosion() {
-            stopBomb();
-            playExplosionSound();
-            triggerVibration([300, 100, 300, 100, 500]);
+            stopRound();
             document.getElementById('status-badge').classList.add('hidden');
+
+            const modalTitle = document.getElementById('explosion-title');
+            const modalReason = document.getElementById('explosion-reason');
+            const modalIcon = document.getElementById('explosion-icon');
+
+            modalTitle.innerText = "¡EXPLOSIÓN!"; // Corrected spelling with S and accent
+
+            if (currentMode === 'letters') {
+                modalIcon.innerText = "💥🍆💣";
+                modalReason.innerText = "¡El tiempo se acabó! El jugador que tenía la palabra o el turno en la mano pierde la ronda.";
+                playExplosionSound();
+                triggerVibration([300, 100, 300, 100, 500]);
+            } else {
+                modalIcon.innerText = "💨🍆💥";
+                modalReason.innerText = "¡Se le reventó la berenjena en la mano! El jugador con el celular en este momento pierde.";
+                playFartSound(); // Loud synthetic fart sound for mode 2
+                triggerVibration([400, 80, 400, 80, 600]);
+            }
+
             document.getElementById('modal-explosion').classList.remove('hidden');
         }
 
         function triggerVictory() {
+            stopRound();
             playVictorySound();
             triggerVibration([200, 100, 200]);
             document.getElementById('status-badge').classList.add('hidden');
@@ -367,15 +514,10 @@
 
         function triggerVibration(pattern) {
             if ("vibrate" in navigator) {
-                try {
-                    navigator.vibrate(pattern);
-                } catch(e) {
-                    // Ignore if permission denied or unsupported
-                }
+                try { navigator.vibrate(pattern); } catch(e) {}
             }
         }
 
-        // WEB AUDIO API SYNTHESIZER SOUNDS (No external assets required)
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -385,19 +527,20 @@
             }
         }
 
-        function playClickSound() {
+        function playPopSound() {
             try {
                 initAudio();
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.start();
-                osc.stop(audioCtx.currentTime + 0.1);
+                osc.stop(audioCtx.currentTime + 0.08);
             } catch(e) {}
         }
 
@@ -407,39 +550,63 @@
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(220, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.2);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.25);
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.start();
-                osc.stop(audioCtx.currentTime + 0.3);
+                osc.stop(audioCtx.currentTime + 0.25);
             } catch(e) {}
         }
 
-        function playLetterClickSound() {
+        // SYNTHETIC WET FART SOUND GENERATOR FOR MODE 2
+        function playFartSound() {
             try {
                 initAudio();
+                const now = audioCtx.currentTime;
+                const duration = 1.2;
+
+                // Low frequency noise oscillator for rumble
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.15);
-                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
-                osc.connect(gain);
+                
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(80, now);
+                osc.frequency.linearRampToValueAtTime(40, now + duration);
+
+                // Modulation for pitch pitch wobble (fart vibration effect)
+                const lfo = audioCtx.createOscillator();
+                const lfoGain = audioCtx.createGain();
+                lfo.frequency.setValueAtTime(25, now); // 25 Hz flutter
+                lfoGain.gain.setValueAtTime(30, now);
+                lfo.connect(osc.frequency);
+
+                // Filter for thick muffled sound
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(400, now);
+                filter.frequency.linearRampToValueAtTime(150, now + duration);
+
+                gain.gain.setValueAtTime(0.6, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+
+                osc.connect(filter);
+                filter.connect(gain);
                 gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.15);
+
+                lfo.start(now);
+                osc.start(now);
+                lfo.stop(now + duration);
+                osc.stop(now + duration);
             } catch(e) {}
         }
 
         function playExplosionSound() {
             try {
                 initAudio();
-                // Create white noise buffer for explosion sound
-                const bufferSize = audioCtx.sampleRate * 1.5;
+                const bufferSize = audioCtx.sampleRate * 1.4;
                 const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
                 const data = buffer.getChannelData(0);
                 for (let i = 0; i < bufferSize; i++) {
@@ -451,12 +618,12 @@
 
                 const filter = audioCtx.createBiquadFilter();
                 filter.type = 'lowpass';
-                filter.frequency.setValueAtTime(300, audioCtx.currentTime);
-                filter.frequency.linearRampToValueAtTime(50, audioCtx.currentTime + 1.5);
+                filter.frequency.setValueAtTime(350, audioCtx.currentTime);
+                filter.frequency.linearRampToValueAtTime(40, audioCtx.currentTime + 1.4);
 
                 const gain = audioCtx.createGain();
-                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+                gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.4);
 
                 noise.connect(filter);
                 filter.connect(gain);
@@ -470,25 +637,24 @@
             try {
                 initAudio();
                 const now = audioCtx.currentTime;
-                [523.25, 659.25, 783.99, 1046.50].forEach((freq, index) => {
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
                     osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(freq, now + index * 0.1);
-                    gain.gain.setValueAtTime(0.1, now + index * 0.1);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.1 + 0.3);
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                    gain.gain.setValueAtTime(0.12, now + idx * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.3);
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
-                    osc.start(now + index * 0.1);
-                    osc.stop(now + index * 0.1 + 0.3);
+                    osc.start(now + idx * 0.1);
+                    osc.stop(now + idx * 0.1 + 0.3);
                 });
             } catch(e) {}
         }
 
-        function showCustomMessage(msg) {
-            // Custom non-blocking notification instead of alert()
+        function showToast(msg) {
             const div = document.createElement('div');
-            div.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-slate-900 border border-orange-500 text-orange-400 px-4 py-3 rounded-2xl shadow-xl z-50 text-xs font-bold transition-all';
+            div.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-eggplant-900 border border-fuchsia-500 text-fuchsia-200 px-4 py-3 rounded-2xl shadow-2xl z-50 text-xs font-bold transition-all';
             div.innerText = msg;
             document.body.appendChild(div);
             setTimeout(() => {
